@@ -108,7 +108,11 @@ async function init() {
     uploader_id   INTEGER NOT NULL,
     downloads     INTEGER DEFAULT 0,
     created_at    TEXT    DEFAULT (datetime('now','localtime')),
+    cloudinary_url TEXT   DEFAULT NULL,
+    cloudinary_id  TEXT   DEFAULT NULL,
     FOREIGN KEY (uploader_id) REFERENCES users(id)
+    downloads     INTEGER DEFAULT 0,
+    created_at    TEXT    DEFAULT (datetime('now','localtime')),
   )`);
 
   await db.run2(`CREATE TABLE IF NOT EXISTS download_history (

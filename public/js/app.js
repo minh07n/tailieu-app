@@ -1,7 +1,7 @@
 /* app.js — TàiLiệuHọc Frontend SPA */
 
 /* ══════════════════════════════════════
-   STATE & UTILS
+  STATE & UTILS
 ══════════════════════════════════════ */
 let currentUser = null;
 
@@ -55,7 +55,7 @@ async function api(method, url, body) {
 }
 
 /* ══════════════════════════════════════
-   AUTH STATE
+  AUTH STATE
 ══════════════════════════════════════ */
 async function loadUser() {
   try {
@@ -228,7 +228,7 @@ window.downloadDoc = async function(id) {
 };
 
 /* ══════════════════════════════════════
-   PAGE: LOGIN
+  PAGE: LOGIN
 ══════════════════════════════════════ */
 function pageLogin() {
   if (currentUser) { navigate('/dashboard'); return; }
@@ -361,7 +361,7 @@ function pageRegister() {
 }
 
 /* ══════════════════════════════════════
-   PAGE: DASHBOARD
+  PAGE: DASHBOARD
 ══════════════════════════════════════ */
 async function pageDashboard() {
   if (!currentUser) { navigate('/login'); return; }
@@ -422,7 +422,7 @@ async function pageDashboard() {
 }
 
 /* ══════════════════════════════════════
-   PAGE: UPLOAD
+  PAGE: UPLOAD
 ══════════════════════════════════════ */
 function pageUpload() {
   if (!currentUser) { navigate('/login'); return; }
@@ -541,7 +541,7 @@ function pageUpload() {
 }
 
 /* ══════════════════════════════════════
-   PAGE: ADMIN
+  PAGE: ADMIN
 ══════════════════════════════════════ */
 async function pageAdmin() {
   if (!currentUser || currentUser.role !== 'admin') {
@@ -670,7 +670,7 @@ async function pageAdmin() {
 }
 
 /* ══════════════════════════════════════
-   HELPERS
+  HELPERS
 ══════════════════════════════════════ */
 function initPassToggle() {
   document.querySelectorAll('.pass-toggle').forEach(btn => {
@@ -683,7 +683,7 @@ function initPassToggle() {
 }
 
 /* ══════════════════════════════════════
-   INIT
+  INIT
 ══════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', async () => {
   // Logout
@@ -700,7 +700,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 /* ══════════════════════════════════════
-   PAGE: PROFILE
+  PAGE: PROFILE
 ══════════════════════════════════════ */
 async function pageProfile() {
   if (!currentUser) { navigate('/login'); return; }
