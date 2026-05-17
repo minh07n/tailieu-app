@@ -193,7 +193,10 @@ async function pagHome() {
         <div><span class="subj-tag">${d.subject}</span></div>
         <div class="doc-footer">
           <span>${fmt(d.size)} · ${fmtDate(d.created_at)}</span>
-          <button class="btn-dl" onclick="downloadDoc(${d.id})">⬇ Tải</button>
+          <div style="display:flex;gap:.4rem">
+            ${d.filetype==='pdf' ? `<button class="btn-preview" onclick="previewDoc(${d.id},'${d.cloudinary_url||''}')">👁</button>` : ''}
+            <button class="btn-dl" onclick="downloadDoc(${d.id})">⬇ Tải</button>
+          </div>
         </div>
       </div>
     `).join('');
@@ -849,3 +852,40 @@ async function pageProfile() {
     setTimeout(() => msg.style.display = 'none', 3000);
   });
 }
+/* ── PREVIEW PDF ── */
+window.previewDoc = function(id, cloudinaryUrl) {
+  if (!currentUser) { showToast('Vui lòng đăng nhập để xem trước', 'warn'); return; }
+
+  // Xóa modal cũ nếu có
+  document.getElementById('preview-modal')?.remove();
+
+  let previewUrl = '';
+  if (cloudinaryUrl) {
+    previewUrl = cloudinaryUrl;
+  } else {
+    previewUrl = `/api/documents/${id}/download`;
+  }
+
+  const modal = document.createElement('div');
+  modal.id = 'preview-modal';
+  modal.className = 'modal-overlay';
+  modal.innerHTML = `
+    <div class="modal-box">
+      <div class="modal-head">
+        <h6>👁 Xem Trước Tài Liệu</h6>
+        <div style="display:flex;gap:.5rem">
+          <button class="btn-close-modal" onclick="downloadDoc(${id})">⬇ Tải Xuống</button>
+          <button class="btn-close-modal" onclick="document.getElementById('preview-modal').remove()">✕ Đóng</button>
+        </div>
+      </div>
+      <iframe src="${previewUrl}" style="flex:1;border:none;width:100%" allowfullscreen></iframe>
+    </div>
+  `;
+
+  // Bấm ngoài để đóng
+  modal.addEventListener('click', e => {
+    if (e.target === modal) modal.remove();
+  });
+
+  document.body.appendChild(modal);
+};
