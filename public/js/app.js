@@ -878,7 +878,7 @@ window.previewDoc = function(id, cloudinaryUrl) {
           <button class="btn-close-modal" onclick="document.getElementById('preview-modal').remove()">✕ Đóng</button>
         </div>
       </div>
-      <iframe src="${previewUrl}" style="flex:1;border:none;width:100%" allowfullscreen></iframe>
+      <iframe src="https://docs.google.com/viewer?url=${encodeURIComponent(previewUrl)}&embedded=true" style="flex:1;border:none;width:100%" allowfullscreen></iframe>
     </div>
   `;
 
