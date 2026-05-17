@@ -5,7 +5,7 @@
 ══════════════════════════════════════ */
 let currentUser = null;
 
-const SUBJECTS = ['Toán học','Vật lý','Hóa học','CNTT','Ngoại ngữ','Kinh tế','Chính trị','Văn học','Khác'];
+const SUBJECTS = ['Toán học','Vật lý','Hóa học','CNTT','Ngoại ngữ','Kinh tế','Chính trị','Văn học','Khác','Đồ Án'];
 const SUBJECT_ICONS = { 'Toán học':'📐','Vật lý':'⚛','Hóa học':'🧪','CNTT':'💻','Ngoại ngữ':'🌐','Kinh tế':'📈','Chính trị':'🏛','Văn học':'✍','Khác':'📁' };
 const TYPE_ICON = { pdf:'📄', doc:'📝', ppt:'📊', xls:'📗', zip:'📦', txt:'📃' };
 const TYPE_CLS  = { pdf:'ico-pdf', doc:'ico-doc', ppt:'ico-ppt', xls:'ico-xls', zip:'ico-zip', txt:'ico-txt' };
