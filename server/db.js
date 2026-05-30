@@ -17,31 +17,31 @@ const SEED_USERS = [
 ];
 
 const SEED_DOCS = [
-  { title:'Giáo trình Lập Trình Web - HTML CSS JavaScript', subject:'CNTT', filetype:'pdf', size:4520000, downloads:342 },
-  { title:'Tài liệu ReactJS cơ bản đến nâng cao', subject:'CNTT', filetype:'pdf', size:3100000, downloads:289 },
-  { title:'Bài giảng Cơ sở dữ liệu - SQL Server', subject:'CNTT', filetype:'pdf', size:5800000, downloads:415 },
-  { title:'Đề cương ôn tập Lập Trình Hướng Đối Tượng Java', subject:'CNTT', filetype:'doc', size:980000, downloads:521 },
-  { title:'Bài tập Python từ cơ bản đến nâng cao có lời giải', subject:'CNTT', filetype:'pdf', size:2300000, downloads:634 },
-  { title:'Tài liệu NodeJS + Express REST API', subject:'CNTT', filetype:'pdf', size:1800000, downloads:256 },
-  { title:'Giáo trình Toán Cao Cấp A1', subject:'Toán học', filetype:'pdf', size:8900000, downloads:487 },
-  { title:'Bài tập Giải tích có lời giải chi tiết', subject:'Toán học', filetype:'pdf', size:6700000, downloads:392 },
-  { title:'Đề thi Toán Rời Rạc các năm kèm đáp án', subject:'Toán học', filetype:'pdf', size:2100000, downloads:318 },
-  { title:'Tài liệu Xác suất thống kê ứng dụng', subject:'Toán học', filetype:'pdf', size:4400000, downloads:276 },
-  { title:'Giáo trình Vật Lý Đại Cương 1', subject:'Vật lý', filetype:'pdf', size:9200000, downloads:356 },
-  { title:'Đề thi Vật Lý Đại Cương các học kỳ', subject:'Vật lý', filetype:'pdf', size:1900000, downloads:445 },
-  { title:'Giáo trình Hóa Đại Cương - Liên kết hóa học', subject:'Hóa học', filetype:'pdf', size:7600000, downloads:223 },
-  { title:'Bài tập Hóa Hữu Cơ có đáp án', subject:'Hóa học', filetype:'pdf', size:4100000, downloads:187 },
-  { title:'Tài liệu TOEIC 900+ - Listening & Reading', subject:'Ngoại ngữ', filetype:'pdf', size:15600000, downloads:712 },
-  { title:'Grammar in Use - Ngữ pháp tiếng Anh đầy đủ', subject:'Ngoại ngữ', filetype:'pdf', size:11200000, downloads:589 },
-  { title:'1000 từ vựng tiếng Anh chuyên ngành CNTT', subject:'Ngoại ngữ', filetype:'doc', size:890000, downloads:334 },
-  { title:'Đề thi tiếng Anh B1 các trường đại học', subject:'Ngoại ngữ', filetype:'pdf', size:3200000, downloads:478 },
-  { title:'Giáo trình Kinh tế Vi mô - Cung cầu thị trường', subject:'Kinh tế', filetype:'pdf', size:6800000, downloads:264 },
-  { title:'Tài liệu Kế toán Tài chính cơ bản', subject:'Kinh tế', filetype:'pdf', size:5300000, downloads:198 },
-  { title:'Tài liệu Triết học Mác-Lênin đầy đủ', subject:'Chính trị', filetype:'pdf', size:4200000, downloads:389 },
-  { title:'Đề cương Tư tưởng Hồ Chí Minh ôn thi', subject:'Chính trị', filetype:'doc', size:1100000, downloads:512 },
-  { title:'Câu hỏi trắc nghiệm Đường lối Cách mạng', subject:'Chính trị', filetype:'pdf', size:2400000, downloads:445 },
-  { title:'Giáo trình Văn học Việt Nam hiện đại', subject:'Văn học', filetype:'pdf', size:7100000, downloads:156 },
-  { title:'Phân tích tác phẩm văn học lớp 12 đầy đủ', subject:'Văn học', filetype:'doc', size:2800000, downloads:234 },
+  { title:'Giáo trình Lập Trình Web - HTML CSS JavaScript', subject:'CNTT', filetype:'pdf', size:4520000, downloads:342, cloudinary_url:'https://www.w3.org/WAI/WCAG21/Techniques/pdf/pdf.pdf' },
+  { title:'Tài liệu ReactJS cơ bản đến nâng cao', subject:'CNTT', filetype:'pdf', size:3100000, downloads:289, cloudinary_url:'https://www.w3.org/WAI/WCAG21/Techniques/pdf/pdf.pdf' },
+  { title:'Bài giảng Cơ sở dữ liệu - SQL Server', subject:'CNTT', filetype:'pdf', size:5800000, downloads:415, cloudinary_url:'https://www.w3.org/WAI/WCAG21/Techniques/pdf/pdf.pdf' },
+  { title:'Đề cương ôn tập Lập Trình Hướng Đối Tượng Java', subject:'CNTT', filetype:'doc', size:980000, downloads:521, cloudinary_url:'https://www.w3.org/WAI/WCAG21/Techniques/pdf/pdf.pdf' },
+  { title:'Bài tập Python từ cơ bản đến nâng cao có lời giải', subject:'CNTT', filetype:'pdf', size:2300000, downloads:634, cloudinary_url:'https://www.w3.org/WAI/WCAG21/Techniques/pdf/pdf.pdf' },
+  { title:'Tài liệu NodeJS + Express REST API', subject:'CNTT', filetype:'pdf', size:1800000, downloads:256, cloudinary_url:'https://www.w3.org/WAI/WCAG21/Techniques/pdf/pdf.pdf' },
+  { title:'Giáo trình Toán Cao Cấp A1', subject:'Toán học', filetype:'pdf', size:8900000, downloads:487, cloudinary_url:'https://www.w3.org/WAI/WCAG21/Techniques/pdf/pdf.pdf' },
+  { title:'Bài tập Giải tích có lời giải chi tiết', subject:'Toán học', filetype:'pdf', size:6700000, downloads:392, cloudinary_url:'https://www.w3.org/WAI/WCAG21/Techniques/pdf/pdf.pdf' },
+  { title:'Đề thi Toán Rời Rạc các năm kèm đáp án', subject:'Toán học', filetype:'pdf', size:2100000, downloads:318, cloudinary_url:'https://www.w3.org/WAI/WCAG21/Techniques/pdf/pdf.pdf' },
+  { title:'Tài liệu Xác suất thống kê ứng dụng', subject:'Toán học', filetype:'pdf', size:4400000, downloads:276, cloudinary_url:'https://www.w3.org/WAI/WCAG21/Techniques/pdf/pdf.pdf' },
+  { title:'Giáo trình Vật Lý Đại Cương 1', subject:'Vật lý', filetype:'pdf', size:9200000, downloads:356, cloudinary_url:'https://www.w3.org/WAI/WCAG21/Techniques/pdf/pdf.pdf' },
+  { title:'Đề thi Vật Lý Đại Cương các học kỳ', subject:'Vật lý', filetype:'pdf', size:1900000, downloads:445, cloudinary_url:'https://www.w3.org/WAI/WCAG21/Techniques/pdf/pdf.pdf' },
+  { title:'Giáo trình Hóa Đại Cương - Liên kết hóa học', subject:'Hóa học', filetype:'pdf', size:7600000, downloads:223, cloudinary_url:'https://www.w3.org/WAI/WCAG21/Techniques/pdf/pdf.pdf' },
+  { title:'Bài tập Hóa Hữu Cơ có đáp án', subject:'Hóa học', filetype:'pdf', size:4100000, downloads:187, cloudinary_url:'https://www.w3.org/WAI/WCAG21/Techniques/pdf/pdf.pdf' },
+  { title:'Tài liệu TOEIC 900+ - Listening & Reading', subject:'Ngoại ngữ', filetype:'pdf', size:15600000, downloads:712, cloudinary_url:'https://www.w3.org/WAI/WCAG21/Techniques/pdf/pdf.pdf' },
+  { title:'Grammar in Use - Ngữ pháp tiếng Anh đầy đủ', subject:'Ngoại ngữ', filetype:'pdf', size:11200000, downloads:589, cloudinary_url:'https://www.w3.org/WAI/WCAG21/Techniques/pdf/pdf.pdf' },
+  { title:'1000 từ vựng tiếng Anh chuyên ngành CNTT', subject:'Ngoại ngữ', filetype:'doc', size:890000, downloads:334, cloudinary_url:'https://www.w3.org/WAI/WCAG21/Techniques/pdf/pdf.pdf' },
+  { title:'Đề thi tiếng Anh B1 các trường đại học', subject:'Ngoại ngữ', filetype:'pdf', size:3200000, downloads:478, cloudinary_url:'https://www.w3.org/WAI/WCAG21/Techniques/pdf/pdf.pdf' },
+  { title:'Giáo trình Kinh tế Vi mô - Cung cầu thị trường', subject:'Kinh tế', filetype:'pdf', size:6800000, downloads:264, cloudinary_url:'https://www.w3.org/WAI/WCAG21/Techniques/pdf/pdf.pdf' },
+  { title:'Tài liệu Kế toán Tài chính cơ bản', subject:'Kinh tế', filetype:'pdf', size:5300000, downloads:198, cloudinary_url:'https://www.w3.org/WAI/WCAG21/Techniques/pdf/pdf.pdf' },
+  { title:'Tài liệu Triết học Mác-Lênin đầy đủ', subject:'Chính trị', filetype:'pdf', size:4200000, downloads:389, cloudinary_url:'https://www.w3.org/WAI/WCAG21/Techniques/pdf/pdf.pdf' },
+  { title:'Đề cương Tư tưởng Hồ Chí Minh ôn thi', subject:'Chính trị', filetype:'doc', size:1100000, downloads:512, cloudinary_url:'https://www.w3.org/WAI/WCAG21/Techniques/pdf/pdf.pdf' },
+  { title:'Câu hỏi trắc nghiệm Đường lối Cách mạng', subject:'Chính trị', filetype:'pdf', size:2400000, downloads:445, cloudinary_url:'https://www.w3.org/WAI/WCAG21/Techniques/pdf/pdf.pdf' },
+  { title:'Giáo trình Văn học Việt Nam hiện đại', subject:'Văn học', filetype:'pdf', size:7100000, downloads:156, cloudinary_url:'https://www.w3.org/WAI/WCAG21/Techniques/pdf/pdf.pdf' },
+  { title:'Phân tích tác phẩm văn học lớp 12 đầy đủ', subject:'Văn học', filetype:'doc', size:2800000, downloads:234, cloudinary_url:'https://www.w3.org/WAI/WCAG21/Techniques/pdf/pdf.pdf' },
 ];
 
 const DATES = [
@@ -77,8 +77,8 @@ async function seedData() {
     const uploaderId = userIds[i % userIds.length];
     const createdAt  = DATES[i % DATES.length] + ' 09:00:00';
     await db.run2(
-      'INSERT INTO documents (title,subject,filename,original_name,size,filetype,uploader_id,downloads,created_at) VALUES (?,?,?,?,?,?,?,?,?)',
-      [d.title, d.subject, filename, `${d.title}.${ext}`, d.size, d.filetype, uploaderId, d.downloads, createdAt]
+      'INSERT INTO documents (title,subject,filename,original_name,size,filetype,uploader_id,downloads,cloudinary_url,created_at) VALUES (?,?,?,?,?,?,?,?,?,?)',
+      [d.title, d.subject, filename, `${d.title}.${ext}`, d.size, d.filetype, uploaderId, d.downloads, d.cloudinary_url, createdAt]
     );
   }
   console.log('✅ Seed data hoàn tất!');
@@ -92,6 +92,10 @@ async function init() {
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     username    TEXT    UNIQUE NOT NULL,
     full_name   TEXT    DEFAULT '',
+    email       TEXT    DEFAULT '',
+    phone       TEXT    DEFAULT '',
+    bio         TEXT    DEFAULT '',
+    avatar_url  TEXT    DEFAULT '',
     password    TEXT    NOT NULL,
     role        TEXT    NOT NULL DEFAULT 'user',
     created_at  TEXT    DEFAULT (datetime('now','localtime'))
@@ -123,6 +127,10 @@ async function init() {
   )`);
 
   await db.run2(`ALTER TABLE users ADD COLUMN full_name TEXT DEFAULT ''`).catch(()=>{});
+  await db.run2(`ALTER TABLE users ADD COLUMN email TEXT DEFAULT ''`).catch(()=>{});
+  await db.run2(`ALTER TABLE users ADD COLUMN phone TEXT DEFAULT ''`).catch(()=>{});
+  await db.run2(`ALTER TABLE users ADD COLUMN bio TEXT DEFAULT ''`).catch(()=>{});
+  await db.run2(`ALTER TABLE users ADD COLUMN avatar_url TEXT DEFAULT ''`).catch(()=>{});
   await db.run2(`ALTER TABLE documents ADD COLUMN cloudinary_url TEXT DEFAULT NULL`).catch(()=>{});
   await db.run2(`ALTER TABLE documents ADD COLUMN cloudinary_id TEXT DEFAULT NULL`).catch(()=>{});
 

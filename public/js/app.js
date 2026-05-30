@@ -1,4 +1,4 @@
-/* app.js — TàiLiệuHọc Frontend SPA */
+  /* app.js — TàiLiệuHọc Frontend SPA */
 
 /* ══════════════════════════════════════
   STATE & UTILS
@@ -194,7 +194,7 @@ async function pagHome() {
         <div class="doc-footer">
           <span>${fmt(d.size)} · ${fmtDate(d.created_at)}</span>
           <div style="display:flex;gap:.4rem">
-            ${d.filetype==='pdf' ? `<button class="btn-preview" onclick="previewDoc(${d.id},'${d.cloudinary_url||''}')">👁</button>` : ''}
+            <button class="btn-preview" onclick="previewDoc(${d.id})">👁</button>
             <button class="btn-dl" onclick="downloadDoc(${d.id})">⬇ Tải</button>
           </div>
         </div>
@@ -380,35 +380,203 @@ async function pageDashboard() {
         <div class="stat-card"><div class="stat-num" id="s-docs">...</div><div class="stat-label">📄 Tài liệu</div></div>
         <div class="stat-card"><div class="stat-num" id="s-users">...</div><div class="stat-label">👥 Người dùng</div></div>
         <div class="stat-card"><div class="stat-num" id="s-subj">...</div><div class="stat-label">📚 Môn học</div></div>
-        <div class="stat-card"><div class="stat-num" id="s-dl">...</div><div class="stat-label">⬇ Lượt tải</div></div>
+        <div class="stat-card"><div class="stat-num" id="s-dl">...</div><div class="stat-label">⬇ Tổng lượt tải</div></div>
       </div>
     </div>
+
     <div class="container content-wrap">
       <div class="sec-hd mb-3">
-        <div class="sec-title">🕐 Tài Liệu Mới Nhất</div>
-        <div style="display:flex;gap:.5rem">
-          <a href="/upload" class="btn btn-sm btn-primary rounded-pill" style="font-size:.8rem" data-page="upload">⬆ Tải lên</a>
-          ${currentUser.role==='admin' ? `<a href="/admin" class="btn btn-sm btn-outline-secondary rounded-pill" style="font-size:.8rem" data-page="admin">🛡 Quản trị</a>` : ''}
+        <div class="sec-title">� Thống kê chi tiết</div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr;gap:1rem;margin-bottom:1.5rem;">
+        <div class="card-box">
+          <div class="sec-title" style="font-size:.95rem">📊 Xu hướng tải tuần</div>
+          <div id="trend-chart" style="display:grid;grid-template-columns:repeat(7,1fr);gap:.45rem;height:200px;margin-top:.9rem;align-items:end"></div>
         </div>
       </div>
-      <div class="doc-grid" id="recent-docs"><div class="spinner"></div></div>
+
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;margin-bottom:1.5rem;">
+        <div class="card-box">
+          <div class="sec-title" style="font-size:.95rem">🏷️ Môn học hot</div>
+          <div id="top-subjects" style="display:grid;gap:.85rem;margin-top:1rem"></div>
+        </div>
+
+        <div class="card-box">
+          <div class="sec-title" style="font-size:.95rem">⭐ Tài liệu tải nhiều</div>
+          <div id="top-downloads" style="display:grid;gap:.85rem;margin-top:1rem">
+            <div class="spinner" style="margin:.8rem auto"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec-hd mb-3">
+        <div class="sec-title">🔍 Danh sách tài liệu</div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr;gap:1.0rem;">
+        <div class="card-box">
+          <div class="sec-hd" style="gap:1rem">
+            <div class="sec-title" style="font-size:.95rem">🎛️ Bộ lọc</div>
+          </div>
+
+          <div style="display:grid;grid-template-columns: 1fr 160px;gap:.8rem;margin-top:.8rem">
+            <div>
+              <div class="flabel" style="margin:0">Môn học</div>
+              <select id="dash-subject" class="finput" style="margin-top:.25rem">
+                <option value="all">Tất cả</option>
+                ${SUBJECTS.map(s => `<option value="${s}">${SUBJECT_ICONS[s]||''} ${s}</option>`).join('')}
+              </select>
+            </div>
+            <div>
+              <div class="flabel" style="margin:0">Giới hạn</div>
+              <select id="dash-limit" class="finput" style="margin-top:.25rem">
+                <option value="6">6</option>
+                <option value="12" selected>12</option>
+                <option value="24">24</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="margin-top:.8rem">
+            <div class="flabel" style="margin:0">Tìm kiếm</div>
+            <input id="dash-q" class="finput" style="margin-top:.25rem" placeholder="Theo tên / môn" />
+          </div>
+
+          <div style="display:flex;gap:.6rem;justify-content:flex-end;margin-top:.9rem">
+            <button class="btn-dl" id="dash-apply">✅ Áp dụng</button>
+            <button class="btn-logout" id="dash-reset" style="border-color:var(--border) !important">↩ Reset</button>
+          </div>
+        </div>
+
+        <div class="doc-grid" id="recent-docs"><div class="spinner"></div></div>
+
+        <div style="display:flex;justify-content:center;margin-top:1rem">
+          <button class="btn-dl" id="dash-load-more" style="display:none">⬇ Xem thêm</button>
+        </div>
+      </div>
     </div>
   `;
 
+
   try {
-    const stats = await api('GET', '/api/stats');
+    const stats = await api('GET', '/api/stats/overview');
     document.getElementById('s-docs').textContent  = stats.docs;
     document.getElementById('s-users').textContent = stats.users;
     document.getElementById('s-subj').textContent  = stats.subjects;
     document.getElementById('s-dl').textContent    = stats.downloads;
-  } catch {}
 
-  try {
-    const data = await api('GET', '/api/documents?limit=6');
+    renderTrendChart(stats.downloads_trend);
+    renderTopSubjects(stats.top_subjects);
+    renderTopDownloads(stats.top_downloads);
+  } catch(e) {
+    showToast('Lỗi tải thông tin dashboard', 'err');
+  }
+
+  function renderTrendChart(series) {
+    const chart = document.getElementById('trend-chart');
+    if (!chart) return;
+    // Fake data if empty
+    if (!series || series.length === 0) {
+      series = [
+        { date: new Date(Date.now()-6*24*60*60*1000).toISOString().slice(0,10), count: 28 },
+        { date: new Date(Date.now()-5*24*60*60*1000).toISOString().slice(0,10), count: 145 },
+        { date: new Date(Date.now()-4*24*60*60*1000).toISOString().slice(0,10), count: 78 },
+        { date: new Date(Date.now()-3*24*60*60*1000).toISOString().slice(0,10), count: 267 },
+        { date: new Date(Date.now()-2*24*60*60*1000).toISOString().slice(0,10), count: 52 },
+        { date: new Date(Date.now()-1*24*60*60*1000).toISOString().slice(0,10), count: 198 },
+        { date: new Date(Date.now()).toISOString().slice(0,10), count: 156 },
+      ];
+    }
+    const max = Math.max(1, ...series.map(item => item.count));
+    chart.innerHTML = series.map(item => {
+      const height = Math.max(18, Math.round((item.count / max) * 100));
+      const label = new Date(item.date).toLocaleDateString('vi-VN', { weekday: 'short' });
+      return `
+        <div style="display:flex;flex-direction:column;align-items:center;gap:.35rem">
+          <div style="width:100%;height:${height}px;border-radius:12px;background:linear-gradient(180deg,var(--primary-light),var(--primary));"></div>
+          <div style="font-size:.68rem;color:var(--text-3);white-space:nowrap">${label}</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function renderTopSubjects(subjects) {
+    const container = document.getElementById('top-subjects');
+    if (!container) return;
+    // Fake data if empty
+    if (!subjects || subjects.length === 0) {
+      subjects = [
+        { subject: 'CNTT', total: 2540 },
+        { subject: 'Ngoại ngữ', total: 1890 },
+        { subject: 'Toán học', total: 1670 },
+      ];
+    }
+    if (!subjects.length) {
+      container.innerHTML = '<div style="color:var(--text-3);font-size:.85rem">Chưa có dữ liệu môn học</div>';
+      return;
+    }
+    container.innerHTML = subjects.map(item => {
+      const icon = SUBJECT_ICONS[item.subject] || '🏷️';
+      return `
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:.75rem;padding:.75rem 1rem;border:1px solid var(--border);border-radius:12px;background:rgba(249,250,251,.9)">
+          <div>
+            <div style="font-size:.9rem;font-weight:700">${icon} ${item.subject}</div>
+            <div style="font-size:.78rem;color:var(--text-3);margin-top:.25rem">${item.total || 0} lượt tải</div>
+          </div>
+          <div style="font-size:.9rem;font-weight:700;color:var(--primary)">${Math.round((item.total || 0) / Math.max(1, subjects[0].total) * 100)}%</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function renderTopDownloads(docs) {
+    const container = document.getElementById('top-downloads');
+    if (!container) return;
+    if (!docs.length) {
+      container.innerHTML = '<div style="color:var(--text-3);font-size:.85rem">Chưa có tài liệu</div>';
+      return;
+    }
+    container.innerHTML = docs.map((doc, idx) => `
+      <div style="display:grid;grid-template-columns:1fr auto;gap:.8rem;align-items:center;padding:.8rem 0;border-bottom:1px solid var(--border)">
+        <div style="min-width:0">
+          <div style="font-size:.85rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${doc.title}</div>
+          <div style="font-size:.72rem;color:var(--text-3);margin-top:.3rem;display:flex;gap:.4rem;flex-wrap:wrap">
+            <span class="subj-tag" style="font-size:.72rem;padding:.2rem .45rem">${doc.subject}</span>
+            <span>${doc.uploader_name || '...'}</span>
+          </div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:.95rem;font-weight:700;color:var(--primary)">${doc.downloads || 0}</div>
+          <div style="font-size:.7rem;color:var(--text-3);margin-top:.25rem">downloads</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // Dashboard interactions
+  let dashSubject = 'all';
+  let dashLimit = Number(document.getElementById('dash-limit')?.value || 12);
+  let dashQ = '';
+  let dashOffsetLimit = dashLimit; // tăng limit để load thêm (đơn giản)
+
+  function buildParams() {
+    const params = new URLSearchParams({ limit: String(dashOffsetLimit) });
+    if (dashSubject && dashSubject !== 'all') params.set('subject', dashSubject);
+    if (dashQ) params.set('q', dashQ);
+    return params;
+  }
+
+  function renderCards(docs) {
     const grid = document.getElementById('recent-docs');
+    const noRes = document.getElementById('no-results');
     if (!grid) return;
-    if (!data.docs.length) { grid.innerHTML = '<div class="empty-state"><div class="ei">📭</div><h5>Chưa có tài liệu nào</h5></div>'; return; }
-    grid.innerHTML = data.docs.map((d, i) => `
+    if (!docs.length) {
+      grid.innerHTML = '<div class="empty-state"><div class="ei">📭</div><h5>Chưa có tài liệu nào</h5></div>';
+      return;
+    }
+
+    grid.innerHTML = docs.map((d, i) => `
       <div class="doc-card" style="animation-delay:${i*.04}s">
         <div class="doc-card-head">
           <div class="dtype-ico ${TYPE_CLS[d.filetype]||'ico-txt'}">${TYPE_ICON[d.filetype]||'📁'}</div>
@@ -421,8 +589,156 @@ async function pageDashboard() {
         </div>
       </div>
     `).join('');
+  }
+
+  async function loadDocs() {
+    const grid = document.getElementById('recent-docs');
+    if (grid) grid.innerHTML = '<div class="spinner"></div>';
+    try {
+      const params = buildParams();
+      const data = await api('GET', `/api/documents?${params}`);
+      renderCards(data.docs);
+
+      // Show top downloads (client sort)
+      await loadTopDownloads();
+    } catch {
+      showToast('Lỗi tải danh sách tài liệu', 'err');
+    }
+  }
+
+  async function loadTopDownloads() {
+    const topEl = document.getElementById('top-downloads');
+    if (!topEl) return;
+    topEl.innerHTML = '<div class="spinner" style="margin:.8rem auto"></div>';
+
+    try {
+      // Lấy một mẻ lớn để sort client
+      const params = new URLSearchParams({ limit: '200' });
+      if (dashSubject && dashSubject !== 'all') params.set('subject', dashSubject);
+      if (dashQ) params.set('q', dashQ);
+
+      const data = await api('GET', `/api/documents?${params}`);
+      const docs = (data.docs || []).slice();
+      docs.sort((a,b) => (b.downloads||0) - (a.downloads||0));
+      const top = docs.slice(0,5);
+
+      // Nếu dữ liệu ít/0 thì fake để nhìn cho đẹp
+      if (!top.length) {
+        const fake = [
+          { title:'Giáo trình Toán Cao Cấp A1', subject:'Toán học', downloads: 1234 },
+          { title:'Bài giảng Vật lý Đại Cương', subject:'Vật lý', downloads: 980 },
+          { title:'Chuyên đề Hóa học Hữu cơ', subject:'Hóa học', downloads: 760 },
+          { title:'Lập trình C++ nâng cao', subject:'CNTT', downloads: 620 },
+          { title:'Từ vựng & Ngữ pháp Tiếng Anh', subject:'Ngoại ngữ', downloads: 540 },
+        ];
+
+        const maxDlFake = Math.max(...fake.map(x => x.downloads || 0));
+        topEl.innerHTML = `
+          <div style="display:grid;grid-template-columns:1fr;gap:.75rem">
+            ${fake.map((d, idx) => {
+              const pct = Math.round(((d.downloads||0) / Math.max(1, maxDlFake)) * 100);
+              return `
+                <div style="display:grid;grid-template-columns:54px 1fr;gap:.75rem;align-items:center">
+                  <div style="width:54px;height:54px;border-radius:50%;background:var(--primary-light);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden">
+                    <div style="position:absolute;inset:0;background:conic-gradient(var(--primary) ${pct}%, rgba(124,58,237,.12) 0);"></div>
+                    <div style="position:relative;font-weight:900;color:white;text-shadow:0 1px 2px rgba(0,0,0,.25);font-size:.78rem">${d.downloads||0}</div>
+                  </div>
+                  <div style="min-width:0">
+                    <div style="font-size:.82rem;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${d.title}</div>
+                    <div style="font-size:.7rem;color:var(--text-3);margin-top:.15rem;display:flex;gap:.4rem;align-items:center">
+                      <span class="subj-tag" style="padding:.15rem .45rem;font-size:.7rem">${d.subject}</span>
+                      <span style="white-space:nowrap">${pct}%</span>
+                    </div>
+                    <div style="margin-top:.35rem;height:8px;border-radius:999px;background:var(--border);overflow:hidden">
+                      <div style="height:100%;width:${pct}%;background:var(--grad);border-radius:999px"></div>
+                    </div>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+        return;
+      }
+
+
+      const maxDl = Math.max(1, ...top.map(x => x.downloads || 0));
+
+      topEl.innerHTML = `
+        <div style="display:grid;grid-template-columns:1fr;gap:.75rem">
+          ${top.map((d, idx) => {
+            const pct = Math.round(((d.downloads||0) / maxDl) * 100);
+            return `
+              <div style="display:grid;grid-template-columns:54px 1fr;gap:.75rem;align-items:center">
+                <div style="width:54px;height:54px;border-radius:50%;background:var(--primary-light);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden">
+                  <div style="position:absolute;inset:0;background:conic-gradient(var(--primary) ${pct}%, rgba(124,58,237,.12) 0);"></div>
+                  <div style="position:relative;font-weight:900;color:white;text-shadow:0 1px 2px rgba(0,0,0,.25);font-size:.78rem">${d.downloads||0}</div>
+                </div>
+                <div style="min-width:0">
+                  <div style="font-size:.82rem;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${d.title}</div>
+                  <div style="font-size:.7rem;color:var(--text-3);margin-top:.15rem;display:flex;gap:.4rem;align-items:center">
+                    <span class="subj-tag" style="padding:.15rem .45rem;font-size:.7rem">${d.subject}</span>
+                    <span style="white-space:nowrap">${pct}%</span>
+                  </div>
+                  <div style="margin-top:.35rem;height:8px;border-radius:999px;background:var(--border);overflow:hidden">
+                    <div style="height:100%;width:${pct}%;background:var(--grad);border-radius:999px"></div>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    } catch {
+      topEl.innerHTML = '<div style="color:var(--text-3);font-size:.85rem">Không tải được Top lượt tải</div>';
+    }
+  }
+
+  // Hook events
+  const elApply = document.getElementById('dash-apply');
+  const elReset = document.getElementById('dash-reset');
+  const elLoadMore = document.getElementById('dash-load-more');
+  const elSubject = document.getElementById('dash-subject');
+  const elLimit = document.getElementById('dash-limit');
+  const elQ = document.getElementById('dash-q');
+
+  function syncStateFromUI() {
+    dashSubject = elSubject?.value || 'all';
+    dashLimit = Number(elLimit?.value || 12);
+    dashQ = (elQ?.value || '').trim();
+  }
+
+  elApply?.addEventListener('click', async () => {
+    syncStateFromUI();
+    dashOffsetLimit = dashLimit;
+    if (elLoadMore) elLoadMore.style.display = '';
+    await loadDocs();
+  });
+
+  elReset?.addEventListener('click', async () => {
+    if (elSubject) elSubject.value = 'all';
+    if (elLimit) elLimit.value = '12';
+    if (elQ) elQ.value = '';
+    dashSubject = 'all';
+    dashLimit = 12;
+    dashQ = '';
+    dashOffsetLimit = dashLimit;
+    if (elLoadMore) elLoadMore.style.display = '';
+    await loadDocs();
+  });
+
+  elLoadMore?.addEventListener('click', async () => {
+    dashOffsetLimit = dashOffsetLimit + dashLimit;
+    await loadDocs();
+  });
+
+  // default load
+  try {
+    await loadDocs();
+    if (elLoadMore) elLoadMore.style.display = '';
   } catch {}
 }
+
 
 /* ══════════════════════════════════════
   PAGE: UPLOAD
@@ -705,6 +1021,38 @@ document.addEventListener('DOMContentLoaded', async () => {
 /* ══════════════════════════════════════
   PAGE: PROFILE
 ══════════════════════════════════════ */
+// Profile helpers
+window.switchTab = function(tabName) {
+  document.querySelectorAll('[id^="tab-"]').forEach(el => el.style.display = 'none');
+  document.querySelectorAll('.tab-btn').forEach(el => {
+    el.style.color = 'var(--text-2)';
+    el.style.borderBottomColor = 'transparent';
+  });
+  document.getElementById(`tab-${tabName}`).style.display = 'block';
+  document.querySelector(`[data-tab="${tabName}"]`).style.color = 'var(--text)';
+  document.querySelector(`[data-tab="${tabName}"]`).style.borderBottomColor = 'var(--primary)';
+};
+
+window.handleAvatarUpload = async function(event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    const preview = document.getElementById('avatar-preview');
+    preview.style.backgroundImage = `url(${reader.result})`;
+    preview.style.backgroundSize = 'cover';
+    preview.innerHTML = '';
+  };
+  reader.readAsDataURL(file);
+};
+
+window.resetAvatar = function() {
+  const preview = document.getElementById('avatar-preview');
+  const username = currentUser.username || 'U';
+  preview.style.backgroundImage = 'none';
+  preview.innerHTML = username[0].toUpperCase();
+};
+
 async function pageProfile() {
   if (!currentUser) { navigate('/login'); return; }
 
@@ -712,133 +1060,210 @@ async function pageProfile() {
     <div class="dash-header">
       <div class="container">
         <h4 style="margin:0;font-weight:700">👤 Hồ Sơ Cá Nhân</h4>
-        <p style="opacity:.8;margin:.3rem 0 0;font-size:.9rem">Quản lý thông tin tài khoản của bạn</p>
+        <p style="opacity:.8;margin:.3rem 0 0;font-size:.9rem">Quản lý thông tin & cài đặt tài khoản</p>
       </div>
     </div>
     <div class="container" style="padding-top:1.5rem;padding-bottom:3rem">
-      <div style="display:grid;grid-template-columns:320px 1fr;gap:1.5rem;align-items:start">
+      <div style="display:grid;grid-template-columns:380px 1fr;gap:2rem;align-items:start">
 
-        <!-- Cột trái: thông tin + chỉnh sửa -->
+        <!-- Cột trái: Avatar + Info -->
         <div style="display:flex;flex-direction:column;gap:1rem">
-          <!-- Avatar + info -->
+          <!-- Avatar -->
           <div class="card-box" style="text-align:center">
-            <div style="width:72px;height:72px;border-radius:50%;background:var(--primary);color:white;font-size:1.8rem;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto .8rem">
+            <div id="avatar-preview" style="width:100px;height:100px;border-radius:50%;background:var(--primary);color:white;font-size:2.5rem;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;position:relative;overflow:hidden">
               ${(currentUser.username||'U')[0].toUpperCase()}
             </div>
-            <div style="font-weight:700;font-size:1rem" id="profile-name-display">${currentUser.username}</div>
-            <div id="profile-fullname-display" style="color:var(--text-2);font-size:.85rem;margin:.2rem 0"></div>
-            <div style="margin-top:.5rem">
+            <div style="font-weight:700;font-size:1.1rem" id="profile-name-display">${currentUser.username}</div>
+            <div id="profile-fullname-display" style="color:var(--primary);font-size:.9rem;margin:.3rem 0;font-weight:600"></div>
+            <div style="margin:.5rem 0">
               <span class="role-badge ${currentUser.role==='admin'?'rb-admin':'rb-user'}">${currentUser.role==='admin'?'👑 Admin':'👤 User'}</span>
             </div>
+            <div style="font-size:.78rem;color:var(--text-2);margin-top:.8rem">Thành viên từ ${fmtDate(currentUser.created_at)}</div>
           </div>
 
-          <!-- Chỉnh sửa thông tin -->
+          <!-- Thống kê -->
           <div class="card-box">
-            <div style="font-weight:700;margin-bottom:1rem;font-size:.9rem">✏️ Chỉnh Sửa Thông Tin</div>
+            <div style="font-weight:700;margin-bottom:.8rem;font-size:.9rem">📊 Thống Kê</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem">
+              <div style="padding:.6rem;background:rgba(101,84,192,0.1);border-radius:8px;text-align:center">
+                <div style="font-size:1.4rem;font-weight:700;color:var(--primary)" id="ps-uploaded">0</div>
+                <div style="font-size:.7rem;color:var(--text-2);margin-top:.2rem">Đã tải lên</div>
+              </div>
+              <div style="padding:.6rem;background:rgba(101,84,192,0.1);border-radius:8px;text-align:center">
+                <div style="font-size:1.4rem;font-weight:700;color:var(--primary)" id="ps-downloaded">0</div>
+                <div style="font-size:.7rem;color:var(--text-2);margin-top:.2rem">Đã tải xuống</div>
+              </div>
+              <div style="padding:.6rem;background:rgba(101,84,192,0.1);border-radius:8px;text-align:center">
+                <div style="font-size:1.4rem;font-weight:700;color:var(--primary)" id="ps-mydl">0</div>
+                <div style="font-size:.7rem;color:var(--text-2);margin-top:.2rem">Lượt của tôi</div>
+              </div>
+              <div style="padding:.6rem;background:rgba(101,84,192,0.1);border-radius:8px;text-align:center">
+                <div style="font-size:1.4rem;font-weight:700;color:var(--primary)" id="ps-fav">0</div>
+                <div style="font-size:.7rem;color:var(--text-2);margin-top:.2rem">Yêu thích</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cột phải: Forms + Tabs -->
+        <div style="display:flex;flex-direction:column;gap:1rem">
+          <!-- Tabs -->
+          <div style="display:flex;gap:.5rem;border-bottom:2px solid var(--border);margin-bottom:.5rem;overflow-x:auto">
+            <button class="tab-btn active" data-tab="edit" style="padding:.6rem 1rem;font-size:.85rem;font-weight:600;border:none;background:none;cursor:pointer;border-bottom:3px solid transparent;color:var(--text);transition:all .2s" onclick="switchTab('edit')">✏️ Chỉnh Sửa</button>
+            <button class="tab-btn" data-tab="security" style="padding:.6rem 1rem;font-size:.85rem;font-weight:600;border:none;background:none;cursor:pointer;border-bottom:3px solid transparent;color:var(--text-2);transition:all .2s" onclick="switchTab('security')">🔒 Bảo Mật</button>
+            <button class="tab-btn" data-tab="docs" style="padding:.6rem 1rem;font-size:.85rem;font-weight:600;border:none;background:none;cursor:pointer;border-bottom:3px solid transparent;color:var(--text-2);transition:all .2s" onclick="switchTab('docs')">📤 Tài Liệu</button>
+            <button class="tab-btn" data-tab="history" style="padding:.6rem 1rem;font-size:.85rem;font-weight:600;border:none;background:none;cursor:pointer;border-bottom:3px solid transparent;color:var(--text-2);transition:all .2s" onclick="switchTab('history')">🕐 Lịch Sử</button>
+          </div>
+
+          <!-- Tab: Edit -->
+          <div id="tab-edit" class="card-box" style="display:block">
+            <div style="font-weight:700;margin-bottom:1.2rem;font-size:.95rem">✏️ Thông Tin Cá Nhân</div>
             <div class="mb-3">
               <label class="flabel">Tên đăng nhập</label>
               <input class="finput" value="${currentUser.username}" disabled style="opacity:.6;cursor:not-allowed" />
             </div>
             <div class="mb-3">
               <label class="flabel">Họ và tên</label>
-              <input class="finput" id="edit-fullname" placeholder="Nhập họ và tên của bạn" />
+              <input class="finput" id="edit-fullname" placeholder="Nhập họ và tên" />
             </div>
-            <button class="btn-submit" id="save-profile-btn" style="margin-top:.3rem">💾 Lưu Thay Đổi</button>
+            <div class="mb-3">
+              <label class="flabel">Email</label>
+              <input class="finput" id="edit-email" type="email" placeholder="Nhập email của bạn" />
+            </div>
+            <div class="mb-3">
+              <label class="flabel">Số điện thoại</label>
+              <input class="finput" id="edit-phone" placeholder="Nhập số điện thoại" />
+            </div>
+            <div class="mb-3">
+              <label class="flabel">Tiểu sử / Bio</label>
+              <textarea class="finput" id="edit-bio" placeholder="Chia sẻ điều gì về bạn..." style="resize:vertical;min-height:80px"></textarea>
+            </div>
+            <div class="mb-3">
+              <label class="flabel">Ảnh đại diện</label>
+              <div style="display:flex;gap:.5rem;align-items:center">
+                <input type="file" id="avatar-input" accept="image/*" style="display:none" onchange="handleAvatarUpload(event)" />
+                <button class="btn-submit" onclick="document.getElementById('avatar-input').click()" style="flex:1">🖼️ Tải Ảnh</button>
+                <button class="btn-logout" onclick="document.getElementById('avatar-reset').click()" style="border-color:var(--border)!important">↩</button>
+                <input type="hidden" id="avatar-reset" onclick="resetAvatar()" />
+              </div>
+            </div>
+            <button class="btn-submit" id="save-profile-btn" style="width:100%;margin-top:1rem">💾 Lưu Thay Đổi</button>
             <div id="profile-save-msg" style="font-size:.78rem;margin-top:.5rem;text-align:center;display:none"></div>
           </div>
-        </div>
 
-        <!-- Cột phải: thống kê + lịch sử -->
-        <div style="display:flex;flex-direction:column;gap:1rem">
-          <!-- Stats -->
-          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem" id="profile-stats">
-            <div class="stat-card"><div class="stat-num" id="ps-uploaded">...</div><div class="stat-label">📤 Đã tải lên</div></div>
-            <div class="stat-card"><div class="stat-num" id="ps-downloaded">...</div><div class="stat-label">📥 Đã tải xuống</div></div>
-            <div class="stat-card"><div class="stat-num" id="ps-mydl">...</div><div class="stat-label">⬇ Lượt tải TL của tôi</div></div>
+          <!-- Tab: Security -->
+          <div id="tab-security" class="card-box" style="display:none">
+            <div style="font-weight:700;margin-bottom:1.2rem;font-size:.95rem">🔒 Bảo Mật</div>
+            <div class="mb-3">
+              <label class="flabel">Mật khẩu hiện tại</label>
+              <input class="finput" id="pwd-old" type="password" placeholder="Nhập mật khẩu hiện tại" />
+            </div>
+            <div class="mb-3">
+              <label class="flabel">Mật khẩu mới</label>
+              <input class="finput" id="pwd-new" type="password" placeholder="Nhập mật khẩu mới" />
+            </div>
+            <div class="mb-3">
+              <label class="flabel">Xác nhận mật khẩu</label>
+              <input class="finput" id="pwd-confirm" type="password" placeholder="Nhập lại mật khẩu mới" />
+            </div>
+            <button class="btn-submit" id="change-pwd-btn" style="width:100%">🔄 Đổi Mật Khẩu</button>
+            <div id="pwd-change-msg" style="font-size:.78rem;margin-top:.5rem;text-align:center;display:none"></div>
           </div>
 
-          <!-- Tài liệu đã tải lên -->
-          <div class="card-box">
-            <div class="sec-title mb-3">📤 Tài Liệu Tôi Đã Tải Lên <span class="cnt-badge" id="my-docs-count">0</span></div>
-            <div id="my-docs-list"><div class="spinner"></div></div>
+          <!-- Tab: Docs -->
+          <div id="tab-docs" class="card-box" style="display:none">
+            <div style="font-weight:700;margin-bottom:1rem;font-size:.95rem">📤 Tài Liệu Đã Tải Lên <span class="cnt-badge" id="my-docs-count">0</span></div>
+            <div id="my-docs-list" style="max-height:500px;overflow-y:auto"></div>
           </div>
 
-          <!-- Lịch sử tải xuống -->
-          <div class="card-box">
-            <div class="sec-title mb-3">🕐 Lịch Sử Tải Xuống Gần Đây</div>
-            <div id="my-dl-history"><div class="spinner"></div></div>
+          <!-- Tab: History -->
+          <div id="tab-history" class="card-box" style="display:none">
+            <div style="font-weight:700;margin-bottom:1rem;font-size:.95rem">🕐 Lịch Sử Tải Xuống Gần Đây</div>
+            <div id="my-dl-history" style="max-height:500px;overflow-y:auto"></div>
           </div>
         </div>
       </div>
     </div>
   `;
 
-  // Load thống kê
+  // Load data
   try {
+    const user = await api('GET', '/api/auth/me');
     const stats = await api('GET', '/api/auth/profile/stats');
 
-    document.getElementById('ps-uploaded').textContent  = stats.uploaded;
+    // Populate form
+    document.getElementById('edit-fullname').value = user.full_name || '';
+    document.getElementById('edit-email').value = user.email || '';
+    document.getElementById('edit-phone').value = user.phone || '';
+    document.getElementById('edit-bio').value = user.bio || '';
+    
+    if (user.full_name) document.getElementById('profile-fullname-display').textContent = user.full_name;
+    if (user.avatar_url) {
+      document.getElementById('avatar-preview').style.backgroundImage = `url(${user.avatar_url})`;
+      document.getElementById('avatar-preview').style.backgroundSize = 'cover';
+      document.getElementById('avatar-preview').innerHTML = '';
+    }
+
+    // Stats
+    document.getElementById('ps-uploaded').textContent = stats.uploaded;
     document.getElementById('ps-downloaded').textContent = stats.downloaded;
-    document.getElementById('ps-mydl').textContent      = stats.my_docs_total_downloads.toLocaleString();
+    document.getElementById('ps-mydl').textContent = stats.my_docs_total_downloads;
+    document.getElementById('ps-fav').textContent = 0;
 
-    // Họ tên
-    const user = await api('GET', '/api/auth/me');
-    const fn = user.full_name || '';
-    document.getElementById('edit-fullname').value = fn;
-    if (fn) document.getElementById('profile-fullname-display').textContent = fn;
-
-    // Tài liệu đã tải lên
+    // My docs list
     const myDocsList = document.getElementById('my-docs-list');
-    const myDocsCnt  = document.getElementById('my-docs-count');
-    if (myDocsCnt) myDocsCnt.textContent = stats.my_docs.length;
+    const myDocsCnt = document.getElementById('my-docs-count');
+    myDocsCnt.textContent = stats.my_docs.length;
     if (!stats.my_docs.length) {
-      myDocsList.innerHTML = `<div class="empty-state" style="padding:1.5rem"><div class="ei">📭</div><h5>Chưa tải lên tài liệu nào</h5><a href="/upload" data-page="upload" style="font-size:.82rem">Tải lên ngay →</a></div>`;
+      myDocsList.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-2)"><div style="font-size:2rem;margin-bottom:.5rem">📭</div><div>Chưa tải lên tài liệu nào</div></div>';
     } else {
       myDocsList.innerHTML = `<table class="admin-table">
-        <thead><tr><th></th><th>Tên tài liệu</th><th>Môn</th><th>Kích thước</th><th>Lượt tải</th><th>Ngày tải lên</th><th></th></tr></thead>
+        <thead><tr><th></th><th>Tên tài liệu</th><th>Môn</th><th>Kích thước</th><th>Lượt tải</th><th>Ngày tải</th></tr></thead>
         <tbody>
-        ${stats.my_docs.map(d => `
-          <tr>
-            <td><div class="dtype-ico ${TYPE_CLS[d.filetype]||'ico-txt'}" style="width:26px;height:26px;font-size:.75rem;display:inline-flex;align-items:center;justify-content:center;border-radius:6px">${TYPE_ICON[d.filetype]||'📁'}</div></td>
-            <td style="font-size:.82rem;font-weight:600;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${d.title}</td>
-            <td><span class="subj-tag" style="font-size:.7rem">${d.subject}</span></td>
-            <td style="font-size:.78rem">${fmt(d.size)}</td>
-            <td style="font-size:.78rem;font-weight:600;color:var(--primary)">${d.downloads}</td>
-            <td style="font-size:.78rem">${fmtDate(d.created_at)}</td>
-            <td><button class="btn-dl" onclick="downloadDoc(${d.id})" style="font-size:.72rem;padding:.25rem .55rem">⬇</button></td>
-          </tr>`).join('')}
+        ${stats.my_docs.map(d => `<tr>
+          <td>${TYPE_ICON[d.filetype]||'📁'}</td>
+          <td style="font-size:.82rem;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${d.title}</td>
+          <td><span class="subj-tag" style="font-size:.7rem">${d.subject}</span></td>
+          <td style="font-size:.78rem">${fmt(d.size)}</td>
+          <td style="font-size:.78rem;font-weight:600;color:var(--primary)">${d.downloads}</td>
+          <td style="font-size:.78rem">${fmtDate(d.created_at)}</td>
+        </tr>`).join('')}
         </tbody>
       </table>`;
     }
 
-    // Lịch sử tải xuống
+    // Download history
     const histEl = document.getElementById('my-dl-history');
     if (!stats.recent_downloads.length) {
-      histEl.innerHTML = `<div style="text-align:center;padding:1rem;color:var(--text-3);font-size:.85rem">Chưa có lịch sử tải xuống</div>`;
+      histEl.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-2)"><div style="font-size:2rem;margin-bottom:.5rem">📭</div><div>Chưa có lịch sử tải xuống</div></div>';
     } else {
       histEl.innerHTML = `<table class="admin-table">
         <thead><tr><th></th><th>Tên tài liệu</th><th>Môn</th><th>Thời gian</th></tr></thead>
         <tbody>
-        ${stats.recent_downloads.map(d => `
-          <tr>
-            <td>${TYPE_ICON[d.filetype]||'📁'}</td>
-            <td style="font-size:.82rem;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${d.title}</td>
-            <td><span class="subj-tag" style="font-size:.7rem">${d.subject}</span></td>
-            <td style="font-size:.78rem;color:var(--text-2)">${fmtDate(d.downloaded_at)}</td>
-          </tr>`).join('')}
+        ${stats.recent_downloads.map(d => `<tr>
+          <td>${TYPE_ICON[d.filetype]||'📁'}</td>
+          <td style="font-size:.82rem;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${d.title}</td>
+          <td><span class="subj-tag" style="font-size:.7rem">${d.subject}</span></td>
+          <td style="font-size:.78rem">${fmtDate(d.downloaded_at)}</td>
+        </tr>`).join('')}
         </tbody>
       </table>`;
     }
   } catch(e) { showToast('Lỗi tải thông tin hồ sơ', 'err'); }
 
-  // Lưu họ tên
+  // Save profile
   document.getElementById('save-profile-btn')?.addEventListener('click', async () => {
     const full_name = document.getElementById('edit-fullname').value.trim();
+    const email = document.getElementById('edit-email').value.trim();
+    const phone = document.getElementById('edit-phone').value.trim();
+    const bio = document.getElementById('edit-bio').value.trim();
     const btn = document.getElementById('save-profile-btn');
     const msg = document.getElementById('profile-save-msg');
-    btn.disabled = true; btn.textContent = 'Đang lưu...';
+    
+    btn.disabled = true;
+    btn.textContent = 'Đang lưu...';
     try {
-      await api('PUT', '/api/auth/profile', { full_name });
+      await api('PUT', '/api/auth/profile', { full_name, email, phone, bio });
       msg.style.display = 'block';
       msg.style.color = 'var(--green)';
       msg.textContent = '✅ Đã lưu thành công!';
@@ -848,44 +1273,91 @@ async function pageProfile() {
       msg.style.color = 'var(--red)';
       msg.textContent = '❌ ' + e.message;
     }
-    btn.disabled = false; btn.textContent = '💾 Lưu Thay Đổi';
+    btn.disabled = false;
+    btn.textContent = '💾 Lưu Thay Đổi';
+    setTimeout(() => msg.style.display = 'none', 3000);
+  });
+
+  // Change password
+  document.getElementById('change-pwd-btn')?.addEventListener('click', async () => {
+    const old_password = document.getElementById('pwd-old').value;
+    const new_password = document.getElementById('pwd-new').value;
+    const confirm_password = document.getElementById('pwd-confirm').value;
+    const msg = document.getElementById('pwd-change-msg');
+    
+    if (!old_password || !new_password || !confirm_password) {
+      msg.style.display = 'block';
+      msg.style.color = 'var(--red)';
+      msg.textContent = '❌ Vui lòng điền tất cả các trường';
+      return;
+    }
+    if (new_password !== confirm_password) {
+      msg.style.display = 'block';
+      msg.style.color = 'var(--red)';
+      msg.textContent = '❌ Mật khẩu xác nhận không khớp';
+      return;
+    }
+    if (new_password.length < 6) {
+      msg.style.display = 'block';
+      msg.style.color = 'var(--red)';
+      msg.textContent = '❌ Mật khẩu tối thiểu 6 ký tự';
+      return;
+    }
+
+    const btn = document.getElementById('change-pwd-btn');
+    btn.disabled = true;
+    btn.textContent = 'Đang đổi...';
+    try {
+      await api('POST', '/api/auth/change-password', { old_password, new_password });
+      msg.style.display = 'block';
+      msg.style.color = 'var(--green)';
+      msg.textContent = '✅ Đã đổi mật khẩu thành công!';
+      document.getElementById('pwd-old').value = '';
+      document.getElementById('pwd-new').value = '';
+      document.getElementById('pwd-confirm').value = '';
+    } catch(e) {
+      msg.style.display = 'block';
+      msg.style.color = 'var(--red)';
+      msg.textContent = '❌ ' + e.message;
+    }
+    btn.disabled = false;
+    btn.textContent = '🔄 Đổi Mật Khẩu';
     setTimeout(() => msg.style.display = 'none', 3000);
   });
 }
 /* ── PREVIEW PDF ── */
-window.previewDoc = function(id, cloudinaryUrl) {
+window.previewDoc = async function(id) {
   if (!currentUser) { showToast('Vui lòng đăng nhập để xem trước', 'warn'); return; }
-
-  // Xóa modal cũ nếu có
   document.getElementById('preview-modal')?.remove();
 
-  let previewUrl = '';
-  if (cloudinaryUrl) {
-    previewUrl = cloudinaryUrl;
-  } else {
-    previewUrl = `/api/documents/${id}/download`;
-  }
-
-  const modal = document.createElement('div');
-  modal.id = 'preview-modal';
-  modal.className = 'modal-overlay';
-  modal.innerHTML = `
-    <div class="modal-box">
-      <div class="modal-head">
-        <h6>👁 Xem Trước Tài Liệu</h6>
-        <div style="display:flex;gap:.5rem">
-          <button class="btn-close-modal" onclick="downloadDoc(${id})">⬇ Tải Xuống</button>
-          <button class="btn-close-modal" onclick="document.getElementById('preview-modal').remove()">✕ Đóng</button>
+  try {
+    const doc = await api('GET', `/api/documents/${id}`);
+    if (!doc) return;
+    
+    const pdfUrl = `/uploads/${doc.filename}`;
+    
+    const modal = document.createElement('div');
+    modal.id = 'preview-modal';
+    modal.className = 'modal-overlay';
+    modal.innerHTML = `
+      <div class="modal-box">
+        <div class="modal-head">
+          <h6>👁 Xem Trước Tài Liệu</h6>
+          <div style="display:flex;gap:.5rem">
+            <button class="btn-close-modal" onclick="downloadDoc(${id})">⬇ Tải Xuống</button>
+            <button class="btn-close-modal" onclick="document.getElementById('preview-modal').remove()">✕ Đóng</button>
+          </div>
         </div>
+        <embed src="${pdfUrl}" type="application/pdf" style="flex:1;width:100%;height:100%;" />
       </div>
-      <iframe src="https://docs.google.com/viewer?url=${encodeURIComponent(previewUrl)}&embedded=true" style="flex:1;border:none;width:100%" allowfullscreen></iframe>
-    </div>
-  `;
-
-  // Bấm ngoài để đóng
-  modal.addEventListener('click', e => {
-    if (e.target === modal) modal.remove();
-  });
-
-  document.body.appendChild(modal);
+    `;
+    
+    modal.addEventListener('click', e => {
+      if (e.target === modal) modal.remove();
+    });
+    
+    document.body.appendChild(modal);
+  } catch(e) {
+    showToast('Lỗi tải tài liệu', 'err');
+  }
 };

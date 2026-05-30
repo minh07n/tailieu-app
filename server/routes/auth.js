@@ -42,15 +42,32 @@ router.post('/logout', (req, res) => { res.clearCookie('token'); res.json({ succ
 
 router.get('/me', authMiddleware, async (req, res) => {
   try {
-    const user = await db.get2('SELECT id,username,full_name,role,created_at FROM users WHERE id=?', [req.user.id]);
+    const user = await db.get2('SELECT id,username,full_name,email,phone,bio,avatar_url,role,created_at FROM users WHERE id=?', [req.user.id]);
     res.json(user);
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
 router.put('/profile', authMiddleware, async (req, res) => {
   try {
-    const { full_name } = req.body;
-    await db.run2('UPDATE users SET full_name=? WHERE id=?', [full_name||'', req.user.id]);
+    const { full_name, email, phone, bio, avatar_url } = req.body;
+    await db.run2('UPDATE users SET full_name=?, email=?, phone=?, bio=?, avatar_url=? WHERE id=?',
+      [full_name||'', email||'', phone||'', bio||'', avatar_url||'', req.user.id]);
+    res.json({ success: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+router.post('/change-password', authMiddleware, async (req, res) => {
+  try {
+    const { old_password, new_password } = req.body;
+    if (!old_password || !new_password) return res.status(400).json({ error: 'Thiếu thông tin' });
+    if (new_password.length < 6) return res.status(400).json({ error: 'Mật khẩu tối thiểu 6 ký tự' });
+    
+    const user = await db.get2('SELECT password FROM users WHERE id=?', [req.user.id]);
+    if (!bcrypt.compareSync(old_password, user.password))
+      return res.status(401).json({ error: 'Mật khẩu hiện tại không chính xác' });
+    
+    const hash = bcrypt.hashSync(new_password, 10);
+    await db.run2('UPDATE users SET password=? WHERE id=?', [hash, req.user.id]);
     res.json({ success: true });
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
@@ -62,8 +79,8 @@ router.get('/profile/stats', authMiddleware, async (req, res) => {
       db.get2('SELECT COUNT(*) as cnt, COALESCE(SUM(downloads),0) as total_dl FROM documents WHERE uploader_id=?', [uid]),
       db.get2('SELECT COUNT(*) as cnt FROM download_history WHERE user_id=?', [uid]),
       db.all2(`SELECT d.title, d.subject, d.filetype, dh.downloaded_at
-               FROM download_history dh JOIN documents d ON dh.doc_id=d.id
-               WHERE dh.user_id=? ORDER BY dh.downloaded_at DESC LIMIT 10`, [uid]),
+              FROM download_history dh JOIN documents d ON dh.doc_id=d.id
+              WHERE dh.user_id=? ORDER BY dh.downloaded_at DESC LIMIT 10`, [uid]),
     ]);
     const myDocs = await db.all2(
       'SELECT id,title,subject,filetype,size,downloads,created_at FROM documents WHERE uploader_id=? ORDER BY created_at DESC',
